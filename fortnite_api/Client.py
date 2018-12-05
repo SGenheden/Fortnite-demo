@@ -3,25 +3,17 @@ import requests
 
 class Client:
 
-    URL = 'https://fortnitetracker.com/profile/'
+    URL = 'https://api.fortnitetracker.com/v1/profile/'
 
     def send_request(self, platform, username):
-        r = requests.get(self.URL + platform + '/' + username)
-        response = r.text
+        headers = {"TRN-Api-Key": "59dcc666-a140-4852-940f-5c31f0457241"}
+        r = requests.get(self.URL + platform + '/' + username, headers=headers)
+        response = r.json()
 
         try:
-            player_data = json.loads(self.find_between(response, 'var playerData = ', ';</script>'))
-            account_info = json.loads(self.find_between(response, 'var accountInfo = ', ';</script>'))
-            lifetime_stats = json.loads(self.find_between(response, 'var LifeTimeStats = ', ';</script>'))
+            player_data = response['stats']
+            lifetime_stats = response['lifeTimeStats']
         except Exception:
             return ''
 
-        return [player_data, account_info, lifetime_stats]
-
-    def find_between(self, s, first, last ):
-        try:
-            start = s.index( first ) + len( first )
-            end = s.index( last, start )
-            return s[start:end]
-        except ValueError:
-            return ""
+        return [player_data, lifetime_stats]
